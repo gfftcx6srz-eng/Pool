@@ -1,38 +1,30 @@
-const CACHE_NAME = 'pool-pwa-v1';
-const OFFLINE_URL = '/offline.html';
-
+const CACHE_NAME = 'pool-pwa-v2';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/offline.html',
-  '/css/styles.css',
-  '/js/app.js',
-  '/js/selbsteinschaetzung.js',
-  '/js/projektlernen.js',
+  '/projektlernen.html',
+  '/selbsteinschaetzung.html',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap'
+  '/offline.html',
+  'https://cdn.tailwindcss.com',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap'
 ];
 
-// Installation
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Cache geöffnet');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
   );
 });
 
-// Aktivierung
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
+        cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Alter Cache gelöscht:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -41,49 +33,21 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch-Strategie: Cache-First mit Network-Fallback
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match(OFFLINE_URL);
-        })
-    );
-    return;
-  }
-
+self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
-        }
-
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
+      .then(response => {
+        if (response) return response;
+        return fetch(event.request)
+          .then(response => {
+            if (!response || response.status !== 200 || response.type !== 'basic') return response;
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
             return response;
-          }
-
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-
-          return response;
-        });
+          })
+          .catch(() => {
+            if (event.request.mode === 'navigate') return caches.match('/offline.html');
+          });
       })
   );
 });
-
-// Background Sync für Daten
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-data') {
-    event.waitUntil(syncData());
-  }
-});
-
-async function syncData() {
-  console.log('Daten werden synchronisiert...');
-}
