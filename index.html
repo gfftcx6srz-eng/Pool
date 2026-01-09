@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="description" content="PooL - Projektlernen & Selbsteinschätzung. Dein Begleiter für selbstbestimmtes Lernen.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PooL">
+    
+    <title>PooL - Projektlernen & Selbsteinschätzung</title>
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">
+        ✅ Gespeichert
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <nav class="nav-header">
+            <div class="nav-content">
+                <div class="nav-logo">
+                    <div class="nav-logo-icon">🏆</div>
+                    <span class="nav-logo-text">PooL</span>
+                </div>
+                <div class="nav-actions">
+                    <button class="nav-btn" id="installBtn" style="display: none;" title="App installieren">
+                        📲
+                    </button>
+                    <button class="nav-btn" id="themeToggle" onclick="AppState.toggleTheme()" title="Design wechseln">
+                        ☀️
+                    </button>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Module Tabs -->
+        <div class="module-tabs">
+            <button class="module-tab active" data-module="projektlernen">
+                <span class="module-tab-icon">📚</span>
+                <span>Projektlernen</span>
+            </button>
+            <button class="module-tab" data-module="selbsteinschaetzung">
+                <span class="module-tab-icon">📊</span>
+                <span>Selbsteinschätzung</span>
+            </button>
+        </div>
+        
+        <!-- Module Contents -->
+        <div class="module-content active" id="module-projektlernen">
+            <div id="projektlernen-content">
+                <!-- Dynamically rendered -->
+            </div>
+        </div>
+        
+        <div class="module-content" id="module-selbsteinschaetzung">
+            <div id="selbsteinschaetzung-content">
+                <!-- Dynamically rendered -->
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer style="margin-top: var(--space-2xl); padding: var(--space-lg); text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+            <p style="margin-bottom: var(--space-sm);">
+                <strong style="color: var(--text-secondary);">📖 Die 7 Prinzipien nach Wolfgang Emer</strong>
+            </p>
+            <p>
+                Gesellschaftsbezug • Lebenspraxisbezug • Selbstbestimmt • Ganzheitlich • Fächerübergreifend • Produktorientierung • Kommunikabilität
+            </p>
+            <p style="margin-top: var(--space-md); opacity: 0.7;">
+                PooL PWA v1.0 • Offline-fähig • Daten werden lokal gespeichert
+            </p>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/selbsteinschaetzung.js"></script>
+    <script src="js/projektlernen.js"></script>
+    
+    <style>
+        /* Module Content Visibility */
+        .module-content {
+            display: none;
+        }
+        .module-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</body>
+</html>
