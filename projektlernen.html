@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektlernen: Sprache</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-50: #eff6ff;
+            --blue-100: #dbeafe;
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            --blue-800: #1e40af;
+            --green-50: #f0fdf4;
+            --green-100: #dcfce7;
+            --green-500: #22c55e;
+            --green-600: #16a34a;
+            --green-800: #166534;
+            --purple-50: #faf5ff;
+            --purple-100: #f3e8ff;
+            --purple-500: #a855f7;
+            --purple-600: #9333ea;
+            --purple-800: #6b21a8;
+            --orange-50: #fff7ed;
+            --orange-100: #ffedd5;
+            --orange-400: #fb923c;
+            --orange-500: #f97316;
+            --orange-600: #ea580c;
+            --orange-800: #9a3412;
+            --pink-50: #fdf2f8;
+            --pink-100: #fce7f3;
+            --teal-50: #f0fdfa;
+            --red-50: #fef2f2;
+            --yellow-50: #fefce8;
+            --yellow-400: #facc15;
+            --indigo-50: #eef2ff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--blue-50) 0%, var(--purple-50) 50%, var(--pink-50) 100%);
+            min-height: 100vh;
+            padding: 1.5rem;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .header {
+            background: var(--white);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, var(--purple-100), var(--pink-100));
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+            opacity: 0.5;
+        }
+
+        .header h1 { font-size: 2.5rem; color: var(--gray-800); margin-bottom: 0.75rem; position: relative; }
+        .header p { color: var(--gray-600); font-size: 1.125rem; position: relative; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .save-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--white);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .save-status.saving { color: var(--orange-500); }
+        .save-status.saved { color: var(--green-600); }
+
+        .save-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gray-300);
+            transition: background 0.3s;
+        }
+
+        .save-status.saving .save-indicator { background: var(--orange-400); animation: pulse 1s infinite; }
+        .save-status.saved .save-indicator { background: var(--green-500); }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .export-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple-500), var(--purple-600));
+            color: var(--white);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover { border-color: var(--purple-500); color: var(--purple-600); }
+
+        .btn-danger {
+            background: var(--red-50);
+            color: #dc2626;
+            border: 2px solid #fecaca;
+        }
+
+        .btn-danger:hover { background: #fecaca; }
+
+        .phase-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 900px) { .phase-nav { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) { .phase-nav { grid-template-columns: repeat(2, 1fr); } }
+
+        .phase-btn {
+            padding: 1rem;
+            border-radius: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .phase-btn:hover { background: rgba(255, 255, 255, 0.8); }
+
+        .phase-btn.active {
+            background: var(--white);
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.05);
+        }
+
+        .phase-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            color: var(--white);
+            font-size: 1.25rem;
+        }
+
+        .phase-icon.blue { background: var(--blue-500); }
+        .phase-icon.green { background: var(--green-500); }
+        .phase-icon.purple { background: var(--purple-500); }
+        .phase-icon.orange { background: var(--orange-500); }
+        .phase-icon.red { background: #ef4444; }
+
+        .phase-btn p { font-weight: 600; font-size: 0.875rem; color: var(--gray-700); text-align: center; }
+
+        .content {
+            background: var(--white);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+        }
+
+        .content h2 { font-size: 1.75rem; color: var(--gray-800); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; }
+        .content h3 { font-size: 1.25rem; color: var(--gray-800); margin-bottom: 0.75rem; margin-top: 1.5rem; }
+
+        .info-box { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border-left: 4px solid; }
+        .info-box.blue { background: var(--blue-50); border-color: var(--blue-500); }
+        .info-box.green { background: var(--green-50); border-color: var(--green-500); }
+        .info-box.purple { background: var(--purple-50); border-color: var(--purple-500); }
+        .info-box.orange { background: var(--orange-50); border-color: var(--orange-500); }
+        .info-box.yellow { background: var(--yellow-50); border-color: var(--yellow-400); }
+        .info-box.red { background: #fef2f2; border-color: #ef4444; }
+        .info-box p { font-size: 0.875rem; color: var(--gray-700); }
+
+        .anforderung-card { border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid; }
+        .anforderung-card.blue { background: var(--blue-50); border-color: var(--blue-500); }
+        .anforderung-card.pink { background: var(--pink-50); border-color: #ec4899; }
+        .anforderung-card.purple { background: var(--purple-50); border-color: var(--purple-500); }
+        .anforderung-card.orange { background: var(--orange-50); border-color: var(--orange-500); }
+        .anforderung-card.green { background: var(--green-50); border-color: var(--green-500); }
+
+        .anforderung-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+
+        .anforderung-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .anforderung-header h4 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+        .anforderung-card.blue h4 { color: var(--blue-800); }
+        .anforderung-card.pink h4 { color: #9d174d; }
+        .anforderung-card.purple h4 { color: var(--purple-800); }
+        .anforderung-card.orange h4 { color: var(--orange-800); }
+        .anforderung-card.green h4 { color: var(--green-800); }
+        .anforderung-header p { color: var(--gray-700); font-size: 0.95rem; }
+
+        .anforderung-content { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) { .anforderung-content { grid-template-columns: 1fr; } }
+
+        .anforderung-checks { background: var(--white); padding: 1rem; border-radius: 0.5rem; }
+        .check-title { font-weight: 600; color: var(--gray-800); margin-bottom: 0.5rem; }
+        .anforderung-beispiele { background: rgba(255,255,255,0.5); padding: 1rem; border-radius: 0.5rem; }
+        .beispiele-title { font-weight: 600; color: var(--gray-800); font-size: 0.875rem; margin-bottom: 0.5rem; }
+        .beispiel-gut { color: var(--green-800); font-size: 0.875rem; margin-bottom: 0.25rem; }
+        .beispiel-schlecht { color: #dc2626; font-size: 0.875rem; }
+
+        .anforderung-eingabe { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.1); }
+        .anforderung-eingabe label { display: block; font-weight: 600; color: var(--gray-800); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .anforderung-eingabe textarea {
+            width: 100%;
+            min-height: 5rem;
+            padding: 0.75rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            background: var(--white);
+            transition: border-color 0.2s;
+        }
+        .anforderung-eingabe textarea:focus { outline: none; border-color: var(--purple-500); }
+
+        .kann-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .kann-card { background: linear-gradient(135deg, var(--yellow-50), var(--orange-50)); padding: 1.25rem; border-radius: 0.75rem; border: 2px solid #fde68a; }
+        .kann-card h4 { color: #92400e; font-weight: 700; margin-bottom: 0.5rem; }
+        .kann-card p { font-size: 0.875rem; color: var(--gray-700); margin-bottom: 0.75rem; }
+        .kann-beispiel { background: var(--white); padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; color: var(--gray-600); }
+
+        .kann-eingabe { margin-bottom: 2rem; }
+        .kann-eingabe label { display: block; font-weight: 600; color: var(--gray-800); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .kann-eingabe textarea {
+            width: 100%;
+            min-height: 5rem;
+            padding: 0.75rem;
+            border: 2px solid #fde68a;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            background: var(--white);
+            transition: border-color 0.2s;
+        }
+        .kann-eingabe textarea:focus { outline: none; border-color: var(--orange-500); }
+
+        .produkte-section { margin-bottom: 2rem; }
+        .produkte-kategorie { margin-bottom: 1.5rem; }
+        .produkte-kategorie > h4 { font-size: 1.125rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .produkte-icon { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--white); font-size: 0.875rem; }
+        .produkte-icon.blue { background: var(--blue-500); }
+        .produkte-icon.green { background: var(--green-500); }
+        .produkte-icon.purple { background: var(--purple-500); }
+
+        .produkte-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; }
+        .produkt-item { padding: 1rem; border-radius: 0.5rem; border: 1px solid; }
+        .produkt-item.blue { background: var(--blue-50); border-color: #bfdbfe; }
+        .produkt-item.green { background: var(--green-50); border-color: #bbf7d0; }
+        .produkt-item.purple { background: var(--purple-50); border-color: #e9d5ff; }
+        .produkt-item strong { display: block; margin-bottom: 0.25rem; }
+        .produkt-item.blue strong { color: var(--blue-800); }
+        .produkt-item.green strong { color: var(--green-800); }
+        .produkt-item.purple strong { color: var(--purple-800); }
+        .produkt-item span { font-size: 0.875rem; color: var(--gray-700); }
+
+        .bewertung-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+        .bewertung-card { background: linear-gradient(135deg, var(--indigo-50), var(--purple-50)); padding: 1.25rem; border-radius: 0.75rem; border-left: 4px solid #6366f1; }
+        .bewertung-card h4 { color: #3730a3; font-weight: 700; margin-bottom: 0.75rem; }
+        .bewertung-card ul { list-style: none; }
+        .bewertung-card li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; color: var(--gray-700); margin-bottom: 0.5rem; }
+        .bewertung-card li::before { content: '→'; color: #6366f1; flex-shrink: 0; }
+
+        .quick-check { background: linear-gradient(135deg, var(--purple-500), #ec4899); border-radius: 1rem; padding: 1.5rem; margin-top: 2rem; color: var(--white); }
+        .quick-check h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--white); }
+        .quick-check-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .quick-check-card { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 1rem; border-radius: 0.75rem; }
+        .quick-check-card h4 { font-weight: 700; margin-bottom: 0.5rem; }
+        .quick-check-card ul { list-style: none; font-size: 0.875rem; }
+        .quick-check-card li { margin-bottom: 0.25rem; }
+
+        .ideas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .idea-card { background: linear-gradient(135deg, var(--purple-50), var(--pink-50)); padding: 1.25rem; border-radius: 0.75rem; }
+        .idea-card h4 { font-weight: 700; color: var(--purple-800); margin-bottom: 0.75rem; font-size: 1rem; }
+        .idea-card ul { list-style: none; font-size: 0.875rem; }
+        .idea-card li { color: var(--gray-700); padding: 0.25rem 0; }
+        .idea-card li::before { content: '• '; color: var(--purple-500); }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 0.75rem;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            resize: vertical;
+        }
+        textarea:focus, input[type="text"]:focus { outline: none; border-color: var(--blue-500); }
+        textarea { min-height: 8rem; }
+
+        .checklist { margin-top: 1rem; }
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .checklist-item:hover { background: var(--gray-50); }
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--gray-300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            margin-top: 2px;
+        }
+        .checklist-item.checked .check-icon { background: var(--green-500); border-color: var(--green-500); color: var(--white); }
+        .checklist-item span { color: var(--gray-700); }
+
+        .hilfsfragen { margin-top: 1rem; }
+        .hilfsfrage-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .hilfsfrage-item:hover { background: var(--gray-50); }
+        .frage-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--blue-400);
+            background: var(--blue-50);
+            color: var(--blue-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            margin-top: 2px;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+        .hilfsfrage-item.checked .frage-icon { background: var(--green-500); border-color: var(--green-500); color: var(--white); font-size: 0; }
+        .hilfsfrage-item.checked .frage-icon::after { content: '✓'; font-size: 0.875rem; }
+        .hilfsfrage-item span { color: var(--gray-700); }
+
+        .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .form-card { padding: 1.25rem; border-radius: 0.75rem; }
+        .form-card.green { background: linear-gradient(135deg, var(--green-50), var(--teal-50)); }
+        .form-card.blue { background: linear-gradient(135deg, var(--blue-50), var(--indigo-50)); }
+        .form-card.orange { background: linear-gradient(135deg, var(--orange-50), var(--red-50)); }
+        .form-card.purple { background: linear-gradient(135deg, var(--purple-50), var(--pink-50)); }
+        .form-card h4 { font-weight: 700; margin-bottom: 0.75rem; font-size: 1rem; }
+        .form-card.green h4 { color: var(--green-800); }
+        .form-card.blue h4 { color: var(--blue-800); }
+        .form-card.orange h4 { color: var(--orange-800); }
+        .form-card.purple h4 { color: var(--purple-800); }
+        .form-card.full-width { margin-bottom: 1rem; }
+        .form-card textarea { background: var(--white); min-height: 6rem; }
+        .form-card textarea.large { min-height: 10rem; }
+
+        .week-entry { background: linear-gradient(135deg, var(--purple-50), var(--pink-50)); padding: 1.25rem; border-radius: 0.75rem; margin-bottom: 1rem; }
+        .week-entry h4 { font-weight: 700; color: var(--purple-800); margin-bottom: 0.75rem; }
+        .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.75rem; }
+        .week-grid label { font-size: 0.875rem; font-weight: 600; color: var(--gray-700); display: block; margin-bottom: 0.25rem; }
+        .week-grid input { background: var(--white); padding: 0.5rem 0.75rem; }
+
+        .btn-add-week { background: var(--purple-500); color: var(--white); margin-bottom: 1.5rem; }
+        .btn-add-week:hover { background: var(--purple-600); }
+
+        .format-options { display: flex; flex-direction: column; gap: 0.5rem; }
+        .format-options label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer; }
+        .format-options input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--orange-500); }
+
+        .footer { margin-top: 1.5rem; background: var(--white); border-radius: 1rem; box-shadow: var(--shadow-lg); padding: 1.5rem; }
+        .footer h3 { font-size: 1.125rem; color: var(--gray-800); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .principles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.875rem; }
+        .principle-card { padding: 0.75rem; border-radius: 0.5rem; }
+        .principle-card.blue { background: var(--blue-50); }
+        .principle-card.green { background: var(--green-50); }
+        .principle-card.orange { background: var(--orange-50); }
+        .principle-card strong { display: block; margin-bottom: 0.25rem; }
+        .principle-card.blue strong { color: var(--blue-800); }
+        .principle-card.green strong { color: var(--green-800); }
+        .principle-card.orange strong { color: var(--orange-800); }
+        .principle-card p { color: var(--gray-700); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--white); border-radius: 1rem; padding: 2rem; max-width: 500px; width: 90%; box-shadow: var(--shadow-xl); }
+        .modal h3 { margin-bottom: 1rem; }
+        .modal p { color: var(--gray-600); margin-bottom: 1.5rem; }
+        .modal-buttons { display: flex; gap: 0.75rem; justify-content: flex-end; }
+
+        @media print {
+            body { background: white !important; padding: 0 !important; }
+            .toolbar, .phase-nav, .btn, .modal-overlay { display: none !important; }
+            .tab-content { display: block !important; page-break-inside: avoid; margin-bottom: 2rem; }
+            .content, .header, .footer { box-shadow: none !important; border: 1px solid #ddd; }
+            .week-entry { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Projektlernen: Sprache</h1>
+            <p>Dein selbstbestimmtes Lernprojekt – von der Idee bis zur Präsentation</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="save-status" id="saveStatus">
+                <span class="save-indicator"></span>
+                <span id="saveText">Noch nicht gespeichert</span>
+            </div>
+            <div class="export-buttons">
+                <button class="btn btn-secondary" onclick="exportJSON()">📥 JSON Export</button>
+                <button class="btn btn-secondary" onclick="importJSON()">📤 JSON Import</button>
+                <button class="btn btn-primary" onclick="exportPDF()">🖨️ Als PDF drucken</button>
+                <button class="btn btn-danger" onclick="confirmReset()">🗑️ Zurücksetzen</button>
+            </div>
+        </div>
+
+        <div class="phase-nav">
+            <button class="phase-btn active" data-tab="start" onclick="switchTab('start')">
+                <div class="phase-icon blue">💡</div>
+                <p>Projektfindung</p>
+            </button>
+            <button class="phase-btn" data-tab="planung" onclick="switchTab('planung')">
+                <div class="phase-icon green">🎯</div>
+                <p>Planung</p>
+            </button>
+            <button class="phase-btn" data-tab="anforderungen" onclick="switchTab('anforderungen')">
+                <div class="phase-icon red">⭐</div>
+                <p>Anforderungen</p>
+            </button>
+            <button class="phase-btn" data-tab="durchfuehrung" onclick="switchTab('durchfuehrung')">
+                <div class="phase-icon purple">👥</div>
+                <p>Durchführung</p>
+            </button>
+            <button class="phase-btn" data-tab="praesentation" onclick="switchTab('praesentation')">
+                <div class="phase-icon orange">🎤</div>
+                <p>Präsentation</p>
+            </button>
+        </div>
+
+        <div class="content">
+            <!-- Tab: Projektfindung -->
+            <div class="tab-content active" id="tab-start">
+                <h2>💡 Phase 1: Projektfindung</h2>
+                <div class="info-box blue">
+                    <p><strong>Prinzip:</strong> Gesellschaftsbezug & Lebenspraxisbezug – Finde ein Thema, das dich interessiert UND für andere relevant ist!</p>
+                </div>
+                <h3>📝 Meine Projektidee</h3>
+                <textarea id="projektIdee" placeholder="Beschreibe hier deine Projektidee in 2-3 Sätzen..." onchange="saveData()"></textarea>
+
+                <h3>❓ Hilfsfragen</h3>
+                <div class="hilfsfragen" id="checklist-start">
+                    <div class="hilfsfrage-item" onclick="toggleCheck(this)"><div class="frage-icon">?</div><span>Was interessiert mich persönlich am Thema Sprache?</span></div>
+                    <div class="hilfsfrage-item" onclick="toggleCheck(this)"><div class="frage-icon">?</div><span>Welches Problem oder Phänomen möchte ich untersuchen?</span></div>
+                    <div class="hilfsfrage-item" onclick="toggleCheck(this)"><div class="frage-icon">?</div><span>Für wen könnte mein Projekt nützlich oder interessant sein?</span></div>
+                    <div class="hilfsfrage-item" onclick="toggleCheck(this)"><div class="frage-icon">?</div><span>Welches konkrete Produkt könnte am Ende entstehen?</span></div>
+                </div>
+
+                <h3>💡 Ideen-Inspirationen</h3>
+                <div class="ideas-grid">
+                    <div class="idea-card"><h4>Gesellschaftsbezug</h4><ul><li>Dialekte in unserer Region dokumentieren</li><li>Mehrsprachigkeit in der Stadt erforschen</li><li>Barrierefreie Sprache: Leichte Sprache für lokale Infos</li><li>Jugendsprache vs. Erwachsenensprache analysieren</li></ul></div>
+                    <div class="idea-card"><h4>Kreativ & Produktiv</h4><ul><li>Podcast über Sprachwandel erstellen</li><li>Poetry Slam organisieren</li><li>Übersetzungs-App für Schulneulinge entwickeln</li><li>Comic in verschiedenen Sprachen gestalten</li></ul></div>
+                    <div class="idea-card"><h4>Forschend & Entdeckend</h4><ul><li>Wie beeinflusst Social Media unsere Sprache?</li><li>Interview-Projekt: Sprachbiografien sammeln</li><li>Werbung analysieren: Manipulation durch Sprache</li><li>KI und Sprache: ChatGPT im Test</li></ul></div>
+                </div>
+            </div>
+
+            <!-- Tab: Planung -->
+            <div class="tab-content" id="tab-planung">
+                <h2>🎯 Phase 2: Planung</h2>
+                <div class="info-box green"><p><strong>Prinzip:</strong> Selbstbestimmtes Lernen – Du entscheidest über Ziele, Methoden und Zeitplan!</p></div>
+                <div class="form-card green full-width"><h4>🎯 Mein Projektziel</h4><textarea id="projektziel" placeholder="Was möchte ich am Ende erreicht haben?" onchange="saveData()"></textarea></div>
+                <div class="form-card blue full-width"><h4>👥 Zielgruppe</h4><textarea id="zielgruppe" placeholder="Für wen ist mein Projekt? Wer profitiert davon?" onchange="saveData()"></textarea></div>
+                <div class="form-card purple full-width"><h4>📋 Arbeitsschritte</h4><textarea id="arbeitsschritte" class="large" placeholder="Wie gehe ich vor? Welche Schritte sind nötig?" onchange="saveData()"></textarea></div>
+                <div class="form-card orange full-width"><h4>🧰 Ressourcenplanung</h4><textarea id="ressourcen" class="large" placeholder="Was brauche ich?" onchange="saveData()"></textarea></div>
+                <div class="form-card green full-width"><h4>📅 Zeitplan (90-Min-Einheiten)</h4><textarea id="zeitplan" class="large" placeholder="Wann mache ich was?" onchange="saveData()"></textarea></div>
+                <div class="form-card blue full-width"><h4>🤝 Außerschulische Partner</h4><textarea id="partner" class="large" placeholder="Wen könnte ich außerhalb der Schule einbeziehen?" onchange="saveData()"></textarea></div>
+                <h3>✓ Planungs-Checkliste</h3>
+                <div class="checklist" id="checklist-planung">
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Projektziel formuliert (Was will ich erreichen?)</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Arbeitsschritte überlegt (Wie gehe ich vor?)</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Ressourcen geplant (Was brauche ich?)</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Zeitplan für 90-Min-Einheiten erstellt</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Außerschulische Partner/Zielgruppe identifiziert</span></div>
+                </div>
+                <div class="info-box yellow" style="margin-top: 1.5rem;"><p><strong>💡 Tipp:</strong> Denke an Kopf (Recherche), Herz (Kreativität) und Hand (Praktisches Tun)!</p></div>
+            </div>
+
+            <!-- Tab: Anforderungen -->
+            <div class="tab-content" id="tab-anforderungen">
+                <h2>⭐ Anforderungen an dein Projektprodukt</h2>
+                <div class="info-box red"><p><strong>Wichtig:</strong> Dies sind keine starren Regeln, sondern Orientierungspunkte!</p></div>
+                <h3>🔴 MUSS-Kriterien (Die 5 Prinzipien nach Wolfgang Emer)</h3>
+                
+                <div class="anforderung-card blue">
+                    <div class="anforderung-header"><div class="anforderung-icon">🌍</div><div><h4>1. Gesellschaftsbezug</h4><p>Dein Projekt behandelt ein Thema, das für andere Menschen relevant ist.</p></div></div>
+                    <div class="anforderung-content">
+                        <div class="anforderung-checks"><p class="check-title">✓ Das bedeutet konkret:</p><div class="checklist" id="checklist-anf-1"><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Es gibt eine echte Zielgruppe außerhalb unserer Klasse</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Das Thema hat einen Bezug zur Realität</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Andere können von meinem Projekt profitieren</span></div></div></div>
+                        <div class="anforderung-beispiele"><p class="beispiele-title">Beispiele:</p><p class="beispiel-gut">✓ Dialekt-Dokumentation für das Stadtarchiv</p><p class="beispiel-gut">✓ Barrierefreie Infos für Newcomer</p><p class="beispiel-schlecht">✗ Fantasy-Geschichte nur für mich selbst</p></div>
+                    </div>
+                    <div class="anforderung-eingabe"><label for="anf-gesellschaft">📝 So erfülle ich dieses Kriterium:</label><textarea id="anf-gesellschaft" placeholder="Beschreibe, wie dein Projekt einen Gesellschaftsbezug hat..." onchange="saveData()"></textarea></div>
+                </div>
+
+                <div class="anforderung-card pink">
+                    <div class="anforderung-header"><div class="anforderung-icon">❤️</div><div><h4>2. Lebensweltbezug</h4><p>Das Projekt knüpft an deine persönlichen Interessen an.</p></div></div>
+                    <div class="anforderung-content">
+                        <div class="anforderung-checks"><p class="check-title">✓ Das bedeutet konkret:</p><div class="checklist" id="checklist-anf-2"><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Ich habe das Thema selbst gewählt</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Es verbindet sich mit meinen Hobbys oder Interessen</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Ich bin motiviert, daran zu arbeiten</span></div></div></div>
+                        <div class="anforderung-beispiele"><p class="beispiele-title">Beispiele:</p><p class="beispiel-gut">✓ Gaming-Sprache analysieren</p><p class="beispiel-gut">✓ Poetry Slam (weil ich gerne schreibe)</p><p class="beispiel-schlecht">✗ Thema vom Lehrer zugeteilt bekommen</p></div>
+                    </div>
+                    <div class="anforderung-eingabe"><label for="anf-lebenswelt">📝 So erfülle ich dieses Kriterium:</label><textarea id="anf-lebenswelt" placeholder="Beschreibe, wie das Projekt mit deinen persönlichen Interessen zusammenhängt..." onchange="saveData()"></textarea></div>
+                </div>
+
+                <div class="anforderung-card purple">
+                    <div class="anforderung-header"><div class="anforderung-icon">🎯</div><div><h4>3. Ganzheitliches Arbeiten</h4><p>Du nutzt verschiedene Arbeitsweisen: Kopf, Herz und Hand.</p></div></div>
+                    <div class="anforderung-content">
+                        <div class="anforderung-checks"><p class="check-title">✓ Das bedeutet konkret:</p><div class="checklist" id="checklist-anf-3"><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>KOPF: Ich recherchiere, analysiere oder forsche</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>HERZ: Ich bin kreativ, gestalte oder erfinde etwas</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>HAND: Ich erstelle etwas Praktisches</span></div></div></div>
+                        <div class="anforderung-beispiele"><p class="beispiele-title">Beispiele:</p><p class="beispiel-gut">✓ Recherche + Interviews + Podcast erstellen</p><p class="beispiel-schlecht">✗ Nur einen Text abschreiben</p></div>
+                    </div>
+                    <div class="anforderung-eingabe"><label for="anf-ganzheitlich">📝 So erfülle ich dieses Kriterium:</label><textarea id="anf-ganzheitlich" placeholder="Beschreibe, wie du Kopf, Herz und Hand in deinem Projekt einsetzt..." onchange="saveData()"></textarea></div>
+                </div>
+
+                <div class="anforderung-card orange">
+                    <div class="anforderung-header"><div class="anforderung-icon">💡</div><div><h4>4. Produktorientierung</h4><p>Am Ende entsteht ein konkretes Produkt mit Mehrwert für andere.</p></div></div>
+                    <div class="anforderung-content">
+                        <div class="anforderung-checks"><p class="check-title">✓ Das bedeutet konkret:</p><div class="checklist" id="checklist-anf-4"><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Es gibt ein sichtbares/hörbares/nutzbares Endergebnis</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Das Produkt hat einen "Gebrauchswert" für andere</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Es ist nicht nur für eine Note gedacht</span></div></div></div>
+                        <div class="anforderung-beispiele"><p class="beispiele-title">Beispiele:</p><p class="beispiel-gut">✓ Podcast, App, Ausstellung, Workshop</p><p class="beispiel-schlecht">✗ Nur ein Arbeitsblatt ausfüllen</p></div>
+                    </div>
+                    <div class="anforderung-eingabe"><label for="anf-produkt">📝 So erfülle ich dieses Kriterium:</label><textarea id="anf-produkt" placeholder="Beschreibe, welches konkrete Produkt am Ende entsteht..." onchange="saveData()"></textarea></div>
+                </div>
+
+                <div class="anforderung-card green">
+                    <div class="anforderung-header"><div class="anforderung-icon">👥</div><div><h4>5. Kommunikabilität</h4><p>Dein Projekt wird nach außen vermittelt und erhält Feedback.</p></div></div>
+                    <div class="anforderung-content">
+                        <div class="anforderung-checks"><p class="check-title">✓ Das bedeutet konkret:</p><div class="checklist" id="checklist-anf-5"><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Ich präsentiere mein Projekt vor einer Öffentlichkeit</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Ich hole Feedback von außerhalb der Klasse ein</span></div><div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Mein Projekt erreicht Menschen außerhalb meiner Gruppe</span></div></div></div>
+                        <div class="anforderung-beispiele"><p class="beispiele-title">Beispiele:</p><p class="beispiel-gut">✓ Ausstellung in der Schule oder Stadt</p><p class="beispiel-gut">✓ Online-Veröffentlichung</p><p class="beispiel-schlecht">✗ Nur in der Klasse vorlesen</p></div>
+                    </div>
+                    <div class="anforderung-eingabe"><label for="anf-kommunikation">📝 So erfülle ich dieses Kriterium:</label><textarea id="anf-kommunikation" placeholder="Beschreibe, wie und wo du dein Projekt präsentierst..." onchange="saveData()"></textarea></div>
+                </div>
+
+                <h3>⭐ KANN-Kriterien (Bonus)</h3>
+                <p style="color: var(--gray-600); margin-bottom: 1rem;">Diese Aspekte machen dein Projekt noch stärker – sind aber optional:</p>
+                <div class="kann-grid">
+                    <div class="kann-card"><h4>Fächerübergreifend</h4><p>Verbindet Sprache mit anderen Fächern</p><div class="kann-beispiel">z.B. Sprache + Technik = App entwickeln</div></div>
+                    <div class="kann-card"><h4>Teamarbeit</h4><p>Zusammenarbeit mit anderen</p><div class="kann-beispiel">z.B. Gemeinsam einen Podcast produzieren</div></div>
+                    <div class="kann-card"><h4>Außerschulische Partner</h4><p>Kooperation mit Organisationen</p><div class="kann-beispiel">z.B. Interview mit Sprachwissenschaftler:in</div></div>
+                </div>
+                <div class="kann-eingabe"><label for="anf-kann">📝 So setze ich die Bonus-Kriterien um (optional):</label><textarea id="anf-kann" placeholder="Beschreibe, ob und wie du diese Kriterien umsetzt..." onchange="saveData()"></textarea></div>
+            </div>
+
+            <!-- Tab: Durchführung -->
+            <div class="tab-content" id="tab-durchfuehrung">
+                <h2>👥 Phase 3: Durchführung</h2>
+                <div class="info-box purple"><p><strong>Prinzip:</strong> Ganzheitliches & Fächerübergreifendes Lernen – Kombiniere verschiedene Methoden und Perspektiven!</p></div>
+                <h3>📅 Wochenprotokoll (90 Min/Woche)</h3>
+                <div id="weekContainer"></div>
+                <button class="btn btn-add-week" onclick="addWeek()">+ Neue Woche hinzufügen</button>
+                <h3>✓ Durchführungs-Checkliste</h3>
+                <div class="checklist" id="checklist-durchfuehrung">
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Recherche durchgeführt (Kopf)</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Kreativ gearbeitet (Herz)</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Etwas Praktisches erstellt (Hand)</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Feedback von außen eingeholt</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Zwischenergebnisse dokumentiert</span></div>
+                </div>
+            </div>
+
+            <!-- Tab: Präsentation -->
+            <div class="tab-content" id="tab-praesentation">
+                <h2>🎤 Phase 4: Präsentation & Reflexion</h2>
+                <div class="info-box orange"><p><strong>Prinzip:</strong> Produktorientierung & Kommunikabilität – Dein Projekt soll anderen einen Mehrwert bieten!</p></div>
+                <div class="two-col">
+                    <div class="form-card orange"><h4>🎤 Präsentationsformat</h4><div class="format-options" id="formatOptions"><label><input type="checkbox" onchange="saveData()"> Vortrag in der Klasse</label><label><input type="checkbox" onchange="saveData()"> Ausstellung in der Schule</label><label><input type="checkbox" onchange="saveData()"> Online-Veröffentlichung</label><label><input type="checkbox" onchange="saveData()"> Performance/Workshop</label><label><input type="checkbox" onchange="saveData()"> Kooperation mit außerschulischen Partnern</label></div></div>
+                    <div class="form-card purple"><h4>🤔 Selbstreflexion</h4><textarea id="reflexion" placeholder="Was habe ich gelernt? Was war besonders herausfordernd? Was würde ich beim nächsten Mal anders machen?" onchange="saveData()"></textarea></div>
+                </div>
+                <h3>✓ Präsentations-Checkliste</h3>
+                <div class="checklist" id="checklist-praesentation">
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Zielgruppe für Präsentation definiert</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Format gewählt</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Produkt fertiggestellt</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Reflexion: Was habe ich gelernt?</span></div>
+                    <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-icon">✓</div><span>Öffentlichkeit hergestellt</span></div>
+                </div>
+                <div class="info-box green" style="margin-top: 1.5rem;"><p><strong>🎉 Glückwunsch!</strong> Du hast alle Phasen durchlaufen. Dein Projekt hat jetzt einen "Mitteilungs- und Gebrauchswert" für andere!</p></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>📖 Die 7 Prinzipien nach Wolfgang Emer</h3>
+            <div class="principles-grid">
+                <div class="principle-card blue"><strong>Ausgangspunkte:</strong><p>• Gesellschaftsbezug<br>• Lebenspraxisbezug</p></div>
+                <div class="principle-card green"><strong>Arbeitsformen:</strong><p>• Selbstbestimmt<br>• Ganzheitlich<br>• Fächerübergreifend</p></div>
+                <div class="principle-card orange"><strong>Zielhorizonte:</strong><p>• Produktorientierung<br>• Kommunikabilität</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal">
+            <h3>🗑️ Alle Daten zurücksetzen?</h3>
+            <p>Möchtest du wirklich alle eingegebenen Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+                <button class="btn btn-danger" onclick="resetAllData()">Ja, alles löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+
+    <script>
+        const STORAGE_KEY = 'projektlernen-sprache-data';
+        let appData = { projektIdee: '', projektziel: '', zielgruppe: '', arbeitsschritte: '', ressourcen: '', zeitplan: '', partner: '', reflexion: '', anfGesellschaft: '', anfLebenswelt: '', anfGanzheitlich: '', anfProdukt: '', anfKommunikation: '', anfKann: '', checklists: { start: [], planung: [], anforderungen: [], durchfuehrung: [], praesentation: [] }, formatOptions: [], weeks: [], lastSaved: null };
+
+        document.addEventListener('DOMContentLoaded', function() { loadData(); updateSaveStatus('loaded'); });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.phase-btn').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.tab === tabId) btn.classList.add('active'); });
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function toggleCheck(element) { element.classList.toggle('checked'); saveData(); }
+
+        function addWeek() { appData.weeks.push({ aktivitaet: '', reflexion: '' }); renderWeeks(); saveData(); }
+
+        function renderWeeks() {
+            const container = document.getElementById('weekContainer');
+            container.innerHTML = '';
+            appData.weeks.forEach((week, index) => {
+                const weekEl = document.createElement('div');
+                weekEl.className = 'week-entry';
+                weekEl.innerHTML = `<h4>Woche ${index + 1}</h4><div class="week-grid"><div><label>Was habe ich gemacht?</label><input type="text" value="${week.aktivitaet}" onchange="updateWeek(${index}, 'aktivitaet', this.value)" placeholder="z.B. Interviews geführt..."></div><div><label>Reflexion</label><input type="text" value="${week.reflexion}" onchange="updateWeek(${index}, 'reflexion', this.value)" placeholder="Was lief gut?"></div></div>`;
+                container.appendChild(weekEl);
+            });
+        }
+
+        function updateWeek(index, field, value) { appData.weeks[index][field] = value; saveData(); }
+
+        function saveData() {
+            updateSaveStatus('saving');
+            appData.projektIdee = document.getElementById('projektIdee').value;
+            appData.projektziel = document.getElementById('projektziel').value;
+            appData.zielgruppe = document.getElementById('zielgruppe').value;
+            appData.arbeitsschritte = document.getElementById('arbeitsschritte').value;
+            appData.ressourcen = document.getElementById('ressourcen').value;
+            appData.zeitplan = document.getElementById('zeitplan').value;
+            appData.partner = document.getElementById('partner').value;
+            appData.reflexion = document.getElementById('reflexion').value;
+            appData.anfGesellschaft = document.getElementById('anf-gesellschaft').value;
+            appData.anfLebenswelt = document.getElementById('anf-lebenswelt').value;
+            appData.anfGanzheitlich = document.getElementById('anf-ganzheitlich').value;
+            appData.anfProdukt = document.getElementById('anf-produkt').value;
+            appData.anfKommunikation = document.getElementById('anf-kommunikation').value;
+            appData.anfKann = document.getElementById('anf-kann').value;
+            ['start', 'planung', 'durchfuehrung', 'praesentation'].forEach(phase => {
+                const items = document.querySelectorAll(`#checklist-${phase} .checklist-item, #checklist-${phase} .hilfsfrage-item`);
+                appData.checklists[phase] = Array.from(items).map(item => item.classList.contains('checked'));
+            });
+            appData.checklists.anforderungen = [];
+            for (let i = 1; i <= 5; i++) {
+                const items = document.querySelectorAll(`#checklist-anf-${i} .checklist-item`);
+                appData.checklists.anforderungen.push(Array.from(items).map(item => item.classList.contains('checked')));
+            }
+            const formatCheckboxes = document.querySelectorAll('#formatOptions input[type="checkbox"]');
+            appData.formatOptions = Array.from(formatCheckboxes).map(cb => cb.checked);
+            appData.lastSaved = new Date().toISOString();
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); setTimeout(() => updateSaveStatus('saved'), 500); } catch (e) { console.error('Error saving:', e); updateSaveStatus('error'); }
+        }
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    appData = JSON.parse(saved);
+                    document.getElementById('projektIdee').value = appData.projektIdee || '';
+                    document.getElementById('projektziel').value = appData.projektziel || '';
+                    document.getElementById('zielgruppe').value = appData.zielgruppe || '';
+                    document.getElementById('arbeitsschritte').value = appData.arbeitsschritte || '';
+                    document.getElementById('ressourcen').value = appData.ressourcen || '';
+                    document.getElementById('zeitplan').value = appData.zeitplan || '';
+                    document.getElementById('partner').value = appData.partner || '';
+                    document.getElementById('reflexion').value = appData.reflexion || '';
+                    document.getElementById('anf-gesellschaft').value = appData.anfGesellschaft || '';
+                    document.getElementById('anf-lebenswelt').value = appData.anfLebenswelt || '';
+                    document.getElementById('anf-ganzheitlich').value = appData.anfGanzheitlich || '';
+                    document.getElementById('anf-produkt').value = appData.anfProdukt || '';
+                    document.getElementById('anf-kommunikation').value = appData.anfKommunikation || '';
+                    document.getElementById('anf-kann').value = appData.anfKann || '';
+                    ['start', 'planung', 'durchfuehrung', 'praesentation'].forEach(phase => {
+                        const items = document.querySelectorAll(`#checklist-${phase} .checklist-item, #checklist-${phase} .hilfsfrage-item`);
+                        const checked = appData.checklists[phase] || [];
+                        items.forEach((item, index) => { if (checked[index]) item.classList.add('checked'); });
+                    });
+                    if (appData.checklists.anforderungen) {
+                        for (let i = 1; i <= 5; i++) {
+                            const items = document.querySelectorAll(`#checklist-anf-${i} .checklist-item`);
+                            const checked = appData.checklists.anforderungen[i-1] || [];
+                            items.forEach((item, index) => { if (checked[index]) item.classList.add('checked'); });
+                        }
+                    }
+                    const formatCheckboxes = document.querySelectorAll('#formatOptions input[type="checkbox"]');
+                    const formatChecked = appData.formatOptions || [];
+                    formatCheckboxes.forEach((cb, index) => { cb.checked = formatChecked[index] || false; });
+                    renderWeeks();
+                }
+            } catch (e) { console.error('Error loading:', e); }
+        }
+
+        function updateSaveStatus(status) {
+            const statusEl = document.getElementById('saveStatus');
+            const textEl = document.getElementById('saveText');
+            statusEl.classList.remove('saving', 'saved');
+            switch(status) {
+                case 'saving': statusEl.classList.add('saving'); textEl.textContent = 'Speichert...'; break;
+                case 'saved': statusEl.classList.add('saved'); textEl.textContent = `Gespeichert um ${new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}`; break;
+                case 'loaded': if (appData.lastSaved) { statusEl.classList.add('saved'); const date = new Date(appData.lastSaved); textEl.textContent = `Zuletzt: ${date.toLocaleDateString('de-DE')} ${date.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}`; } break;
+                case 'error': textEl.textContent = 'Fehler beim Speichern'; break;
+            }
+        }
+
+        function exportJSON() { saveData(); const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `projektlernen-sprache-${new Date().toISOString().split('T')[0]}.json`; a.click(); }
+        function importJSON() { document.getElementById('fileInput').click(); }
+        function handleFileImport(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { appData = JSON.parse(e.target.result); localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); loadData(); updateSaveStatus('saved'); alert('Daten erfolgreich importiert!'); } catch (err) { alert('Fehler beim Importieren.'); } }; reader.readAsText(file); event.target.value = ''; }
+        function exportPDF() { window.print(); }
+        function confirmReset() { document.getElementById('resetModal').classList.add('active'); }
+        function closeModal() { document.getElementById('resetModal').classList.remove('active'); }
+        function resetAllData() { localStorage.removeItem(STORAGE_KEY); location.reload(); }
+
+        document.querySelectorAll('textarea, input[type="text"]').forEach(el => { el.addEventListener('input', debounce(saveData, 1000)); });
+        function debounce(func, wait) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); }; }
+    </script>
+</body>
+</html>

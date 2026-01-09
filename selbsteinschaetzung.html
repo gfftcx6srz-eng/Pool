@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selbsteinschätzung PooL v1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .emoji-button { transition: all 0.2s; }
+        .emoji-button:hover { transform: scale(1.05); }
+        .emoji-button.selected { transform: scale(1.1); }
+        .save-indicator { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #10b981; color: white; border-radius: 8px; display: none; z-index: 1000; }
+        .save-indicator.show { display: block; animation: fadeInOut 2s; }
+        @keyframes fadeInOut { 0%, 100% { opacity: 0; } 10%, 90% { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen p-6">
+    <div class="save-indicator" id="saveIndicator">✓ Automatisch gespeichert</div>
+    <div id="app" class="max-w-6xl mx-auto"></div>
+
+    <script>
+        let state = {
+            zeitpunkt: 'anfang',
+            daten: {
+                anfang: { bewertungen: {}, reflexionen: {}, expandedKompetenz: null },
+                mitte: { bewertungen: {}, reflexionen: {}, expandedKompetenz: null },
+                ende: { bewertungen: {}, reflexionen: {}, expandedKompetenz: null }
+            }
+        };
+
+        function loadState() {
+            const saved = localStorage.getItem('selbsteinschaetzung-v1-zeitpunkte');
+            if (saved) { try { state = JSON.parse(saved); } catch (e) { console.error('Fehler:', e); } }
+        }
+
+        function saveState() {
+            localStorage.setItem('selbsteinschaetzung-v1-zeitpunkte', JSON.stringify(state));
+            showSaveIndicator();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+        }
+
+        function resetData() {
+            if (confirm('Möchtest du wirklich alle Daten zurücksetzen?')) {
+                localStorage.removeItem('selbsteinschaetzung-v1-zeitpunkte');
+                state = { zeitpunkt: 'anfang', daten: { anfang: { bewertungen: {}, reflexionen: {}, expandedKompetenz: null }, mitte: { bewertungen: {}, reflexionen: {}, expandedKompetenz: null }, ende: { bewertungen: {}, reflexionen: {}, expandedKompetenz: null } } };
+                render();
+            }
+        }
+
+        function exportData() {
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'selbsteinschaetzung-v1-export.json';
+            link.click();
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 20;
+            let yPos = margin;
+
+            doc.setFillColor(139, 92, 246);
+            doc.rect(0, 0, pageWidth, 50, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Meine Kompetenzen im PooL', pageWidth / 2, 25, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text('Selbsteinschätzung - ' + new Date().toLocaleDateString('de-DE'), pageWidth / 2, 38, { align: 'center' });
+            
+            yPos = 65;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Entwicklungsvergleich', margin, yPos);
+            yPos += 10;
+
+            const anfang = gesamtDurchschnitt('anfang');
+            const mitte = gesamtDurchschnitt('mitte');
+            const ende = gesamtDurchschnitt('ende');
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Anfang: ${anfang || '-'}  |  Mitte: ${mitte || '-'}  |  Ende: ${ende || '-'}`, margin, yPos);
+            
+            if (anfang && ende) {
+                const diff = (parseFloat(ende) - parseFloat(anfang)).toFixed(1);
+                doc.text(`  |  Entwicklung: ${diff > 0 ? '+' : ''}${diff}`, margin + 100, yPos);
+            }
+            yPos += 15;
+
+            kompetenzbereiche.forEach(bereich => {
+                if (yPos > 250) { doc.addPage(); yPos = 20; }
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${bereich.emoji} ${bereich.titel}`, margin, yPos);
+                const avg = berechneDurchschnitt(bereich.id);
+                if (avg) doc.text(`Ø ${avg}`, pageWidth - margin - 10, yPos);
+                yPos += 8;
+
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                bereich.kompetenzen.forEach(k => {
+                    if (yPos > 270) { doc.addPage(); yPos = 20; }
+                    const wert = state.daten[state.zeitpunkt].bewertungen[k.id];
+                    doc.text(`• ${k.text.substring(0, 80)}${k.text.length > 80 ? '...' : ''}`, margin + 2, yPos);
+                    doc.text(wert ? String(wert) : '-', pageWidth - margin - 5, yPos);
+                    yPos += 5;
+                });
+                yPos += 5;
+            });
+
+            doc.save('selbsteinschaetzung-pool.pdf');
+        }
+
+        const kompetenzbereiche = [
+            {
+                id: 'selbstkompetenz', titel: 'Selbstkompetenz', emoji: '🧠', farbe: 'blue',
+                kompetenzen: [
+                    { id: 's1', text: 'Ich kann mein Thema/meine Fragestellung selbstständig wählen und eingrenzen' },
+                    { id: 's2', text: 'Ich plane meinen Lernprozess selbst (Schritte, Zeitplan, Ressourcen)' },
+                    { id: 's3', text: 'Ich übernehme Verantwortung für den Erfolg meines Projekts' },
+                    { id: 's4', text: 'Ich kann meine eigenen Interessen erkennen und verfolgen' },
+                    { id: 's5', text: 'Ich reflektiere regelmäßig meinen Lernstand und passe mein Vorgehen an' },
+                    { id: 's6', text: 'Ich arbeite selbstständig, auch wenn keine Lehrkraft direkt anwesend ist' }
+                ]
+            },
+            {
+                id: 'sozialkompetenz', titel: 'Sozialkompetenz', emoji: '👥', farbe: 'green',
+                kompetenzen: [
+                    { id: 'so1', text: 'Ich kann in einer Gruppe konstruktiv zusammenarbeiten' },
+                    { id: 'so2', text: 'Ich teile Aufgaben fair auf und halte Absprachen ein' },
+                    { id: 'so3', text: 'Ich kann mit unterschiedlichen Meinungen umgehen und Kompromisse finden' },
+                    { id: 'so4', text: 'Ich gebe anderen konstruktives Feedback' },
+                    { id: 'so5', text: 'Ich kann um Hilfe bitten und anderen helfen' },
+                    { id: 'so6', text: 'Ich übernehme Verantwortung für das gemeinsame Ergebnis' }
+                ]
+            },
+            {
+                id: 'kognitive', titel: 'Kognitive Fähigkeiten', emoji: '💡', farbe: 'purple',
+                kompetenzen: [
+                    { id: 'k1', text: 'Ich recherchiere gezielt Informationen zu meinem Thema' },
+                    { id: 'k2', text: 'Ich entwickle kreative Lösungsansätze für Probleme' },
+                    { id: 'k3', text: 'Ich verbinde Wissen aus verschiedenen Fächern' },
+                    { id: 'k4', text: 'Ich lerne ganzheitlich (Kopf, Herz und Hand)' },
+                    { id: 'k5', text: 'Ich erkenne Zusammenhänge zwischen meinem Thema und der Gesellschaft' },
+                    { id: 'k6', text: 'Ich kann mein Wissen strukturiert darstellen und präsentieren' }
+                ]
+            },
+            {
+                id: 'demokratie', titel: 'Demokratiebildung', emoji: '⚖️', farbe: 'orange',
+                kompetenzen: [
+                    { id: 'd1', text: 'Ich bringe mich aktiv in Entscheidungsprozesse ein' },
+                    { id: 'd2', text: 'Ich respektiere demokratische Entscheidungen der Gruppe' },
+                    { id: 'd3', text: 'Ich gestalte den Lernprozess aktiv mit' },
+                    { id: 'd4', text: 'Ich höre anderen aktiv zu und lasse sie ausreden' },
+                    { id: 'd5', text: 'Ich erkenne, dass meine Entscheidungen Auswirkungen auf andere haben' },
+                    { id: 'd6', text: 'Ich übernehme verschiedene Rollen in der Gruppe' }
+                ]
+            }
+        ];
+
+        const skala = [
+            { wert: 1, emoji: '😟', farbe: 'bg-red-100 border-red-300' },
+            { wert: 2, emoji: '😐', farbe: 'bg-orange-100 border-orange-300' },
+            { wert: 3, emoji: '🙂', farbe: 'bg-yellow-100 border-yellow-300' },
+            { wert: 4, emoji: '😊', farbe: 'bg-lime-100 border-lime-300' },
+            { wert: 5, emoji: '😃', farbe: 'bg-green-100 border-green-300' }
+        ];
+
+        const farbeMap = {
+            blue: 'from-blue-400 to-cyan-400',
+            green: 'from-green-400 to-emerald-400',
+            purple: 'from-purple-400 to-pink-400',
+            orange: 'from-orange-400 to-red-400'
+        };
+
+        function getCurrentData() { return state.daten[state.zeitpunkt]; }
+
+        function setBewertung(kompId, wert) {
+            getCurrentData().bewertungen[kompId] = wert;
+            saveState();
+            render();
+        }
+
+        function toggleBereich(bereichId) {
+            const current = getCurrentData().expandedKompetenz;
+            getCurrentData().expandedKompetenz = current === bereichId ? null : bereichId;
+            saveState();
+            render();
+        }
+
+        function setZeitpunkt(wert) {
+            state.zeitpunkt = wert;
+            saveState();
+            render();
+        }
+
+        function berechneDurchschnitt(bereichId, zeitpunkt = null) {
+            const zp = zeitpunkt || state.zeitpunkt;
+            const bereich = kompetenzbereiche.find(b => b.id === bereichId);
+            const bewertungen = state.daten[zp].bewertungen;
+            const werte = bereich.kompetenzen.map(k => bewertungen[k.id]).filter(w => w);
+            if (werte.length === 0) return null;
+            return (werte.reduce((a, b) => a + b, 0) / werte.length).toFixed(1);
+        }
+
+        function gesamtDurchschnitt(zeitpunkt = null) {
+            const zp = zeitpunkt || state.zeitpunkt;
+            const alle = Object.values(state.daten[zp].bewertungen).filter(w => w);
+            if (alle.length === 0) return null;
+            return (alle.reduce((a, b) => a + b, 0) / alle.length).toFixed(1);
+        }
+
+        function anzahlBewertet() {
+            return Object.values(getCurrentData().bewertungen).filter(w => w).length;
+        }
+
+        function gesamtKompetenzen() {
+            return kompetenzbereiche.reduce((sum, b) => sum + b.kompetenzen.length, 0);
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            const fortschritt = (anzahlBewertet() / gesamtKompetenzen()) * 100;
+            
+            app.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-4xl">🏆</div>
+                            <div>
+                                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Meine Kompetenzen im PooL</h1>
+                                <p class="text-gray-600 text-lg">Selbsteinschätzung Version 1</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="exportPDF()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 text-sm flex items-center gap-1">📄 PDF</button>
+                            <button onclick="exportData()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">💾 JSON</button>
+                            <button onclick="resetData()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm">🔄 Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl mb-4">
+                        <label class="block font-semibold text-gray-800 mb-2">Zeitpunkt:</label>
+                        <select onchange="setZeitpunkt(this.value)" class="w-full p-3 border-2 border-purple-300 rounded-lg font-semibold">
+                            <option value="anfang" ${state.zeitpunkt === 'anfang' ? 'selected' : ''}>🚀 Projektbeginn</option>
+                            <option value="mitte" ${state.zeitpunkt === 'mitte' ? 'selected' : ''}>⏳ Projekt-Mitte</option>
+                            <option value="ende" ${state.zeitpunkt === 'ende' ? 'selected' : ''}>🎯 Projektende</option>
+                        </select>
+                        <p class="text-xs text-gray-600 mt-2">💡 Jeder Zeitpunkt wird separat gespeichert!</p>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-gray-700">Fortschritt:</span>
+                            <span class="text-blue-600 font-bold">${anzahlBewertet()} / ${gesamtKompetenzen()}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all" style="width: ${fortschritt}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                ${renderVergleich()}
+                ${kompetenzbereiche.map(b => renderBereich(b)).join('')}
+                ${gesamtDurchschnitt() ? renderAuswertung() : ''}
+            `;
+        }
+
+        function renderVergleich() {
+            const anfang = gesamtDurchschnitt('anfang');
+            const mitte = gesamtDurchschnitt('mitte');
+            const ende = gesamtDurchschnitt('ende');
+            
+            if (!anfang && !mitte && !ende) return '';
+
+            return `
+                <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">📈 Entwicklungsvergleich</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg text-center">
+                            <div class="text-sm text-gray-600 mb-1">Anfang</div>
+                            <div class="text-3xl font-bold text-blue-600">${anfang || '-'}</div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg text-center">
+                            <div class="text-sm text-gray-600 mb-1">Mitte</div>
+                            <div class="text-3xl font-bold text-purple-600">${mitte || '-'}</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg text-center">
+                            <div class="text-sm text-gray-600 mb-1">Ende</div>
+                            <div class="text-3xl font-bold text-green-600">${ende || '-'}</div>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg text-center">
+                            <div class="text-sm text-gray-600 mb-1">Entwicklung</div>
+                            <div class="text-2xl font-bold text-orange-600">
+                                ${anfang && ende ? `${ende > anfang ? '📈 +' : '📉 '}${(ende - anfang).toFixed(1)}` : '-'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBereich(bereich) {
+            const durchschnitt = berechneDurchschnitt(bereich.id);
+            const isExpanded = getCurrentData().expandedKompetenz === bereich.id;
+            const bewertungen = getCurrentData().bewertungen;
+            const bewertet = bereich.kompetenzen.filter(k => bewertungen[k.id]).length;
+
+            return `
+                <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                    <div onclick="toggleBereich('${bereich.id}')" class="cursor-pointer flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br ${farbeMap[bereich.farbe]} flex items-center justify-center text-3xl">${bereich.emoji}</div>
+                            <div>
+                                <h2 class="text-xl md:text-2xl font-bold text-gray-800">${bereich.titel}</h2>
+                                <p class="text-sm text-gray-500">${bewertet} / ${bereich.kompetenzen.length} bewertet</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            ${durchschnitt ? `<div class="text-2xl md:text-3xl font-bold text-purple-600">${durchschnitt}</div>` : ''}
+                            <span class="text-2xl">${isExpanded ? '▼' : '▶'}</span>
+                        </div>
+                    </div>
+
+                    ${isExpanded ? `
+                        <div class="space-y-3 mt-4">
+                            ${bereich.kompetenzen.map(k => renderKompetenz(k)).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderKompetenz(komp) {
+            const bewertungen = getCurrentData().bewertungen;
+            const aktuelleWert = bewertungen[komp.id];
+
+            return `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="font-semibold text-gray-800 mb-3">${komp.text}</p>
+                    <div class="grid grid-cols-5 gap-2">
+                        ${skala.map(s => `
+                            <button onclick="setBewertung('${komp.id}', ${s.wert})" 
+                                    class="emoji-button p-2 md:p-3 rounded-lg border-2 transition-all ${
+                                        aktuelleWert === s.wert 
+                                            ? `${s.farbe} border-gray-400 selected shadow-md` 
+                                            : 'bg-white border-gray-200 hover:border-gray-400'
+                                    }">
+                                <div class="text-xl md:text-2xl">${s.emoji}</div>
+                                <div class="text-xs font-semibold text-center">${s.wert}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAuswertung() {
+            const zeitpunktLabels = { anfang: '🚀 Projektbeginn', mitte: '⏳ Projekt-Mitte', ende: '🎯 Projektende' };
+            return `
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-xl p-8 text-white">
+                    <h2 class="text-3xl font-bold mb-6">📊 Auswertung (${zeitpunktLabels[state.zeitpunkt]})</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white/20 backdrop-blur rounded-xl p-6">
+                            <h3 class="font-bold text-xl mb-4">Durchschnittswerte</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between bg-white/30 p-3 rounded">
+                                    <span>Gesamt:</span>
+                                    <span class="text-2xl font-bold">${gesamtDurchschnitt()}</span>
+                                </div>
+                                ${kompetenzbereiche.map(b => {
+                                    const avg = berechneDurchschnitt(b.id);
+                                    return avg ? `<div class="flex justify-between bg-white/20 p-2 rounded"><span>${b.titel}:</span><span class="font-bold">${avg}</span></div>` : '';
+                                }).join('')}
+                            </div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-xl p-6">
+                            <h3 class="font-bold text-xl mb-4">Interpretation</h3>
+                            <div class="space-y-2 text-sm">
+                                <p><strong>4.0-5.0:</strong> Sehr gut! 🌟</p>
+                                <p><strong>3.0-3.9:</strong> Gut unterwegs 👍</p>
+                                <p><strong>2.0-2.9:</strong> Entwicklungspotenzial 📈</p>
+                                <p><strong>1.0-1.9:</strong> Unterstützung hilfreich 🤝</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        loadState();
+        render();
+    </script>
+</body>
+</html>
